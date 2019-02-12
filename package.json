@@ -7,5 +7,16 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tejash Shrestha",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shresthaprotejash/gmailXerox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shresthaprotejash/gmailXerox/issues"
+  },
+  "homepage": "https://github.com/shresthaprotejash/gmailXerox#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
