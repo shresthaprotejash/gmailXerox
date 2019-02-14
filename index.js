@@ -32,15 +32,25 @@ app.use("/", function(req, res) {
     res.send(url);
 });
 
-app.use("/oauthCallback", function (req, res) {
+app.get("/url", function(req, res){
+	res.send(url);
+});
+
+app.get("/tokens", function(req, res) {
+	console.log("alright");
     var session = req.session;
+    console.log("alright");
     var code = req.query.code;
+    console.log(code);
     oauth2Client.getToken(code, function(err, tokens) {
+console.log(err);
+console.log(tokens);
 
       if(!err) {
         oauth2Client.setCredentials(tokens);
+        
         session["tokens"]=tokens;
-        res.send('Login Sucessfull');
+        res.send(tokens);
       }
       else{
         res.send('Login failed!!');

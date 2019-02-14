@@ -16,15 +16,32 @@
 <script>
 
     var app = angular.module("myApp", []);
-    var url;
-    app.controller("ctrl",function($scope,$http){
+    
+    app.controller("ctrl",function($scope,$http, $window){
+        var url;
         $http.get("url").then(function(response){
-            alert(response.data);
+            //alert(response.data);
             url=response.data;
         });    
 
+    var win;
     $scope.login = function(){
-        var win = window.open(url,"hello","width=500px,height=700px");
+        win = $window.open(url,"hello","width=500px,height=700px");
+    }
+
+    window.onmessage = function(e){
+        win.close();
+        var urlWithCode = e.data;
+        console.log(urlWithCode);
+
+        var idx = urlWithCode.lastIndexOf("code=");
+        var code = urlWithCode.substring(idx + 5,urlWithCode.lastIndexOf("&scope=")).replace("#","");
+
+        console.log(code);
+
+        $http.get("tokens?code="+code).then(function(response){
+            console.log(response.data);
+        })
     }
 
     });
