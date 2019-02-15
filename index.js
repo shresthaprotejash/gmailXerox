@@ -8,6 +8,7 @@ const OAuth2 = google.auth.OAuth2;
 const app = express();
 const path = require('path');
 const router = express.Router();
+var request = require('request-promise');
 var __dirname = "G:/git-projects/gmailXerox";
 
 app.use(Session({
@@ -43,7 +44,7 @@ app.get("/tokens", function(req, res) {
         oauth2Client.setCredentials(tokens);
         console.log(tokens);
         session["tokens"]=tokens;
-        listmessage();
+        listmessage(tokens.access_token);
         res.send(tokens);
       }
       else{
@@ -52,21 +53,42 @@ app.get("/tokens", function(req, res) {
     });
 });
 
-function listmessage(){
-var gmail = google.gmail({ auth: oauth2Client, version: 'v1' });
-var p = new Promise(function (resolve, reject) {
-   var emails = gmail.users.messages.list({
-          includeSpamTrash: false,
-          maxResults: 10,
-          userId: 'me'
-      }, function (err, results) {
-    	   console.log(results);
-          console.log(results.data);
-          console.log(results.data.messages);          
-          resolve(results|| err);
-      });
-    });
+function listmessage(access_token){
+	console.log(access_token);
+request({
+  "method":"GET", 
+  "uri": "https://www.googleapis.com/gmail/v1/users/me/messages?includeSpamTrash=false&maxResults=10",
+  "json": true,
+  "headers": {
+    "User-Agent": "google-api-nodejs-client/0.7.2 (gzip)",
+    "Authorization": "Bearer "+ access_token,    
+    "Accept": 'application/json'}
+  }).then(function(res){
+  	console.log(res);
+  	console.log(res.messages);
+  	console.log(res.messages[0]);
+  	for(var i = 0; i < res.messages.length;i++){
+        getmessage(res.messages[i], access_token);
+  }
+  });
 }
+
+function getmessage(message,access_token){
+	console.log(message);
+	request({
+  	"method":"GET", 
+  "uri": "https://www.googleapis.com/gmail/v1/users/me/messages/"+message.id,
+  "json": true,
+  "headers": {
+    "User-Agent": "google-api-nodejs-client/0.7.2 (gzip)",
+    "Authorization": "Bearer "+ access_token,    
+    "Accept": 'application/json'}
+  }).then(function(res){
+  	console.log(res.snippet);
+});
+}
+
+
 
 
 router.get("/*",function(req,res){
@@ -77,3 +99,5 @@ router.get("/*",function(req,res){
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
+
+
