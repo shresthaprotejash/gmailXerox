@@ -7,14 +7,39 @@ const Session = require('express-session');
 const OAuth2 = google.auth.OAuth2;
 const app = express();
 const path = require('path');
-var request = require('request-promise');
+const request = require('request-promise');
+
+const MongoClient = require('mongodb').MongoClient;
+const mongo_url = "mongodb://localhost:27017/";
+
 var __dirname = "G:/git-projects/gmailXerox";
 var threads =[];
+
 app.use(Session({
     secret: 'tejash-secret-19890913007',
     resave: true,
     saveUninitialized: true
 }));
+
+MongoClient.connect(mongo_url, function(err, db) {
+		  if (err) throw err;
+		  var dbo = db.db("mymails");
+
+		  dbo.listCollections().toArray(function(err, collInfos) {
+		    console.log(collInfos);
+		    console.log(collInfos.length);
+		    if(collInfos.length>=1){
+		      dbo.dropCollection("mails", function(err, delOK) {
+		        if (err) {
+		          console.log("Already deleted");
+		        }
+		        if (delOK) console.log("Collection deleted");
+		        db.close();
+		    });
+		      
+		    }
+		  });
+});
 
 var oauth2Client = new OAuth2("1046715194877-fl8olkt9nhn4u3jvguotvi7a1gfbibil.apps.googleusercontent.com", "wlb8sKTgXaZxehS726LFGODI", "http://localhost:8000/oauthcallback");//paste accordingly
 var scopes =['https://www.googleapis.com/auth/gmail.readonly'];
@@ -85,7 +110,7 @@ function getmessage(message,access_token,max_length){
 	    "Accept": 'application/json'}
   }).then(function(res){  	
   	var thread={};
-  	thread["id"]=res.threadId;
+  	thread["threadid"]=res.threadId;
   	thread["message"]=res.snippet;
   	for(var i =0; i<res.payload.headers.length;i++){
 
@@ -109,10 +134,10 @@ function getmessage(message,access_token,max_length){
   		for(var i =0; i<threads.length;i++){
     		msg =[threads[i].message];
     		for(var j=i+1; j<threads.length;j++){
-        		if(threads[i].id==threads[j].id){
+        		if(threads[i].threadid==threads[j].threadid){
             		msg.push(threads[j].message);
             		threads.splice(j, 1);
-            		if(j==i+1){
+            		if(j==(i+1)){
             			j--;
             		}
         		}
@@ -125,19 +150,29 @@ function getmessage(message,access_token,max_length){
 
 		console.log(threads.length);
 		console.log(threads);
- 	}
-  
-  	
-  	/*var subject= JSON.parse(res.payload.headers);
-  	console.log(subject[''])
-  	console.log(res.payload.headers[0]);
-  	console.log(res.payload.headers[14]);
-  	console.log(res.payload.headers[16]);
-  	console.log(res.snippet);*/
-  	
-});
-}
 
+		MongoClient.connect(mongo_url, function(err, db) {
+		  if (err) throw err;
+		  var dbo = db.db("mymails");
+
+		  dbo.collection("mails").insertMany(threads, function(err, res) {
+		    if (err) throw err;
+		    console.log("Number of documents inserted: " + res.insertedCount);
+		    db.close();
+		  });
+
+		  dbo.collection("mails").find({}).toArray(function(err, result) {
+		    if (err) throw err;
+		    console.log(result);
+		    db.close();
+		  });
+
+		});
+			
+ 	} 	
+
+	});	
+}
 app.get("/*",function(req,res){
 	res.end("SITE NOT FOUND 404")
 })
