@@ -7,7 +7,6 @@ const Session = require('express-session');
 const OAuth2 = google.auth.OAuth2;
 const app = express();
 const path = require('path');
-const router = express.Router();
 var request = require('request-promise');
 var __dirname = "G:/git-projects/gmailXerox";
 
@@ -64,9 +63,9 @@ request({
     "Authorization": "Bearer "+ access_token,    
     "Accept": 'application/json'}
   }).then(function(res){
-  	console.log(res);
+  	/*console.log(res);
   	console.log(res.messages);
-  	console.log(res.messages[0]);
+  	console.log(res.messages[0]);*/
   	for(var i = 0; i < res.messages.length;i++){
         getmessage(res.messages[i], access_token);
   }
@@ -77,21 +76,22 @@ function getmessage(message,access_token){
 	console.log(message);
 	request({
   	"method":"GET", 
-  "uri": "https://www.googleapis.com/gmail/v1/users/me/messages/"+message.id,
-  "json": true,
-  "headers": {
-    "User-Agent": "google-api-nodejs-client/0.7.2 (gzip)",
-    "Authorization": "Bearer "+ access_token,    
-    "Accept": 'application/json'}
+  	"uri": "https://www.googleapis.com/gmail/v1/users/me/messages/"+message.id,
+  	"json": true,
+  	"headers": {
+	    "User-Agent": "google-api-nodejs-client/0.7.2 (gzip)",
+	    "Authorization": "Bearer "+ access_token,    
+	    "Accept": 'application/json'}
   }).then(function(res){
+  	console.log(res.payload.headers[0]);
+  	console.log(res.payload.headers[14]);
+  	console.log(res.payload.headers[16]);
   	console.log(res.snippet);
+  	
 });
 }
 
-
-
-
-router.get("/*",function(req,res){
+app.get("/*",function(req,res){
 	res.end("SITE NOT FOUND 404")
 })
 
