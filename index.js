@@ -27,29 +27,23 @@ function getAuthUrl() {
     return url;
 }
 app.use(express.static('static'));
-app.use("/", function(req, res) {
-  var url = getAuthUrl();
-    res.send(url);
-});
+
+var url = getAuthUrl();
+
 
 app.get("/url", function(req, res){
 	res.send(url);
 });
 
 app.get("/tokens", function(req, res) {
-	console.log("alright");
     var session = req.session;
-    console.log("alright");
     var code = req.query.code;
-    console.log(code);
     oauth2Client.getToken(code, function(err, tokens) {
-console.log(err);
-console.log(tokens);
-
       if(!err) {
         oauth2Client.setCredentials(tokens);
-        
+        console.log(tokens);
         session["tokens"]=tokens;
+        listmessage();
         res.send(tokens);
       }
       else{
@@ -57,6 +51,23 @@ console.log(tokens);
       }
     });
 });
+
+function listmessage(){
+var gmail = google.gmail({ auth: oauth2Client, version: 'v1' });
+var p = new Promise(function (resolve, reject) {
+   var emails = gmail.users.messages.list({
+          includeSpamTrash: false,
+          maxResults: 10,
+          userId: 'me'
+      }, function (err, results) {
+    	   console.log(results);
+          console.log(results.data);
+          console.log(results.data.messages);          
+          resolve(results|| err);
+      });
+    });
+}
+
 
 router.get("/*",function(req,res){
 	res.end("SITE NOT FOUND 404")

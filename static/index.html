@@ -32,7 +32,7 @@
     window.onmessage = function(e){
         win.close();
         var urlWithCode = e.data;
-        console.log(urlWithCode);
+        console.log(urlWithCode); 
 
         var idx = urlWithCode.lastIndexOf("code=");
         var code = urlWithCode.substring(idx + 5,urlWithCode.lastIndexOf("&scope=")).replace("#","");
