@@ -96,10 +96,10 @@ app.use("/search", function(req, res) {
 	})
 	console.log(key.length);
 	if(key.length==0){
-		console.log("Please Enter key to search");
+		res.send("empty");
 	}
 	if(key.length>1){
-		console.log("Please enter only one keyword");
+		res.send("more");
 	}
 	if(key.length==1){
 		console.log("searching");
@@ -112,6 +112,12 @@ app.use("/search", function(req, res) {
 			}
 			console.log(loop);
 			loop++;
+		}
+
+		if(results.length==0){
+			res.send("No Results Found");
+		}else{
+			res.send(results);
 		}
 	}
 });
