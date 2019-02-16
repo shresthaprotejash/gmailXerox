@@ -7,11 +7,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <title>GmailAuth</title>
 
+<style>
+    img
+    {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top:15%;
+        width: 30%;
+    }
+</style>
 </head>
 
 <body ng-app="myApp" ng-controller="ctrl">
 
-    <img ng-click="login()" src="https://res.cloudinary.com/practicaldev/image/fetch/s--YVSXRIP0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://thepracticaldev.s3.amazonaws.com/i/c74ljgt1t4o1ko28ycm8.png">
+    <img ng-click="login()" src="https://raw.githubusercontent.com/react-native-community/react-native-google-signin/HEAD/img/signin-button.png">
 
 <script>
 
@@ -20,7 +30,6 @@
     app.controller("ctrl",function($scope,$http, $window){
         var url;
         $http.get("url").then(function(response){
-            //alert(response.data);
             url=response.data;
         });    
 
@@ -31,17 +40,12 @@
 
     window.onmessage = function(e){
         win.close();
-        var urlWithCode = e.data;
-        console.log(urlWithCode); 
-
+        var urlWithCode = e.data; 
         var idx = urlWithCode.lastIndexOf("code=");
         var code = urlWithCode.substring(idx + 5,urlWithCode.lastIndexOf("&scope=")).replace("#","");
 
-        console.log(code);
-
         $http.get("tokens?code="+code).then(function(response){
             if(response.data){
-                console.log(response.data);
                 $window.location.href = '/search';
             }
         })

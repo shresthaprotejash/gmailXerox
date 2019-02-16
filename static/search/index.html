@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Message Saerch</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-  <style>
+<style>
   topsearch .search-container {
-  float: center;
-}
+    float: center;
+  }
 
 .topsearch input[type=text] {
   padding: 6px;
@@ -21,9 +21,9 @@
 
 #textboxid
 {
-    height:37px;
-    width:99%;
-    font-size:14pt;
+  height:37px;
+  width:99%;
+  font-size:14pt;
 }
 
 .btn-success{
@@ -41,99 +41,97 @@ body{
   margin-left: 10%;
 }
 
-
 .jumbotron{
   text-align: center;
 }
-  </style>
+</style>
 </head>
 
 <body onload="init()">
+  
   <div class="jumbotron">
     <h1>Search Your Mails</h1>
   </div>
+
   <div class="search">
- <div class = "topsearch">
-  
-    <div class="search-container">
-      <form id="myFormId">
-        <div class="card panel panel-default" id ="search">
-          <input type="text" placeholder="Type a KeyWord to begin..." name="keyword" id="textboxid">
-        </div>
-        <button type="submit" class="btn btn-success">Search</button>
-      </form>    
+    <div class = "topsearch">
+      <div class="search-container">
+        <form id="myFormId">
+          <div class="card panel panel-default" id ="search">
+            <input type="text" placeholder="Type a KeyWord to begin..." name="keyword" id="textboxid">
+          </div>
+          <button type="submit" class="btn btn-success">Search</button>
+        </form>    
+      </div>
+    </div>
+    <br>
+
+    <div class="panel panel-default" id="searchResult">
+    <div class="container">        
+      <table class="table table-hover" id="tableId">
+        <thead>
+          <tr>
+            <th class="col-xs-2">Date</th>
+            <th class="col-xs-3">From</th>
+            <th class="col-xs-7">Subject</th>
+          </tr>
+        </thead>
+
+        <tbody>
+      
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
-<br>
 
-<div class="panel panel-default" id="searchResult">
-<div class="container">        
-  <table class="table table-hover" id="tableId">
-    <thead>
-      <tr>
-        <th class="col-xs-2">Date</th>
-        <th class="col-xs-3">From</th>
-        <th class="col-xs-7">Subject</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-    </tbody>
-  </table>
-</div>
-</div>
-</div>
+
 <div class="detail_message">
   <div class="btn btn-primary" onclick="showSearch()">back</div>
-
   <div class="panel panel-default">
-  <div class="container">   
+    <div class="container">   
       <div id="subject"></div>
       <div id="from"></div>
-      <br>
-      <hr>
+        <br>
+        <hr>
       <div id="message"></div>
+    </div>
   </div>
-  </div>
-
 </div>
 
 <script>
 
 function init(){
+  alert("Loading Your messages");
   var threads = [];
-    $(".detail_message").hide(); 
+  $(".detail_message").hide(); 
   $("#searchResult").hide(); 
-  }
+}
 
-  function displayResults(){
-
-    $("#searchResult").show(); 
-  }
+function displayResults(){
+  $("#searchResult").show(); 
+}
 
   
-  function showSearch(){
-    $(".detail_message").hide(); 
-    $(".search").show();     
-  }
+function showSearch(){
+  $(".detail_message").hide(); 
+  $(".search").show();     
+}
 
-  function showMessage(index){
-        console.log(index);
-        document.getElementById('subject').innerHTML = '<h3>Subject: '+threads[index-1].subject+'</h3>';
-        document.getElementById('from').innerHTML = '<h4>From: '+threads[index-1].from+'</h4>';
-        console.log(threads[index-1].message.length);
-        if(Array.isArray(threads[index-1].message)){
-          document.getElementById('message').innerHTML = '';
-          threads[index-1].message.forEach(function(msg){
-            document.getElementById('message').innerHTML+= msg+ "<br><hr><br>";
-          });
-        }else{
-          document.getElementById('message').innerHTML = threads[index-1].message;
-        }
-        
-        $(".search").hide(); 
-        $(".detail_message").show(); 
-      } 
+function showMessage(index){
+  document.getElementById('subject').innerHTML = '<h3>Subject: '+threads[index-1].subject+'</h3>';
+  document.getElementById('from').innerHTML = '<h4>From: '+threads[index-1].from+'</h4>';
+  if(Array.isArray(threads[index-1].message)){
+    document.getElementById('message').innerHTML = '';
+      threads[index-1].message.forEach(function(msg){
+        document.getElementById('message').innerHTML+= msg+ "<br><hr><br>";
+      });
+  }else{
+    document.getElementById('message').innerHTML = threads[index-1].message;
+  }
+  $(".search").hide(); 
+  $(".detail_message").show(); 
+} 
 
 $(function() {
   $('#myFormId').on('submit',function(){
@@ -146,8 +144,11 @@ $(function() {
       contentType: 'application/json',
       data: JSON.stringify({keyword: keyword.val()}),
       success: function(response){ 
-        console.log(response);
-        if(response=="empty"){
+        //console.log(response);
+        if(response=="notloggedin"){
+            alert("Please Login To Search mails");
+            window.location.href = '/';
+        }else if(response=="empty"){
             alert("Please Enter key to search");
         } else if (response == 'more') {
             alert("Please Enter a single keyword");
@@ -188,8 +189,6 @@ function addRowHandlers() {
     currentRow.onclick = createClickHandler(currentRow);
   }
 }
-
-
 </script>
 
 </body>
