@@ -85,7 +85,35 @@ app.get("/tokens", function(req, res) {
 });
 
 app.use("/search", function(req, res) {
-	console.log("Request  "+req.body.keyword);
+	console.log("Request  "+ req.body.keyword);
+	var x = req.body.keyword;
+	x=x.split(" ");
+	var key = [];
+	x.forEach(function(data){
+		if(data!=""){
+			key.push( data);
+		}
+	})
+	console.log(key.length);
+	if(key.length==0){
+		console.log("Please Enter key to search");
+	}
+	if(key.length>1){
+		console.log("Please enter only one keyword");
+	}
+	if(key.length==1){
+		console.log("searching");
+		var results = [];
+		var loop =0;
+		while(results.length!=2 && (loop)!=threads.length){
+			if(threads[loop].subject.toLowerCase().includes(key[0].toLowerCase())){
+				//console.log(threads[loop].subject);
+				results.push(threads[loop]);
+			}
+			console.log(loop);
+			loop++;
+		}
+	}
 });
 
 function listmessage(access_token){
@@ -173,11 +201,7 @@ function getmessage(message,access_token,max_length){
 		  });
 
 		
-		  dbo.collection("mails").find({}).toArray(function(err, result) {
-		    if (err) throw err;
-		    console.log(result);
-		    db.close();
-		  });
+		  
 		 
 
 		});
