@@ -68,7 +68,7 @@ body{
 
 <div class="panel panel-default" id="searchResult">
 <div class="container">        
-  <table class="table table-hover">
+  <table class="table table-hover" id="tableId">
     <thead>
       <tr>
         <th class="col-xs-2">Date</th>
@@ -88,9 +88,11 @@ body{
 
   <div class="panel panel-default">
   <div class="container">   
-      <div id="subject"><h2>Subject: "Its a email heading"</h2></div>
-      <div id="from"><h4>From: hiphop.shrestha@gmail.com</h4></div>
-      <div id="message"><h4>message very long message</h4></div>
+      <div id="subject"></div>
+      <div id="from"></div>
+      <br>
+      <hr>
+      <div id="message"></div>
   </div>
   </div>
 
@@ -99,6 +101,7 @@ body{
 <script>
 
 function init(){
+  var threads = [];
     $(".detail_message").hide(); 
   $("#searchResult").hide(); 
   }
@@ -114,15 +117,25 @@ function init(){
     $(".search").show();     
   }
 
-  function showMessage(thread){
-        console.log(thread);
+  function showMessage(index){
+        console.log(index);
+        document.getElementById('subject').innerHTML = '<h3>Subject: '+threads[index-1].subject+'</h3>';
+        document.getElementById('from').innerHTML = '<h4>From: '+threads[index-1].from+'</h4>';
+        console.log(threads[index-1].message.length);
+        if(Array.isArray(threads[index-1].message)){
+          document.getElementById('message').innerHTML = '';
+          threads[index-1].message.forEach(function(msg){
+            document.getElementById('message').innerHTML+= msg+ "<br><hr><br>";
+          });
+        }else{
+          document.getElementById('message').innerHTML = threads[index-1].message;
+        }
+        
         $(".search").hide(); 
         $(".detail_message").show(); 
       } 
 
 $(function() {
-
-
   $('#myFormId').on('submit',function(){
     event.preventDefault();
     var keyword = $('#textboxid');
@@ -141,6 +154,7 @@ $(function() {
         } else if(response == 'No Results Found'){
             alert("No Results Found");
         }else{
+        threads=response;
         var tbodyEl = $('tbody');
         tbodyEl.html('');
         response.forEach(function(result){
@@ -153,14 +167,27 @@ $(function() {
             ');
         });
         displayResults();
+        addRowHandlers();
         }
       }
-      
-
-
     });
   });
 });
+
+
+function addRowHandlers() {
+  var table = document.getElementById("tableId");
+  var rows = table.getElementsByTagName("tr");
+  for (i = 0; i < rows.length; i++) {
+    var currentRow = table.rows[i];
+    var createClickHandler = function(row) {
+      return function() {
+        showMessage(row.rowIndex);
+      };
+    };
+    currentRow.onclick = createClickHandler(currentRow);
+  }
+}
 
 
 </script>
