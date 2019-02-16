@@ -8,6 +8,7 @@ const OAuth2 = google.auth.OAuth2;
 const app = express();
 const path = require('path');
 const request = require('request-promise');
+const bodyParser = require('body-parser')
 
 const MongoClient = require('mongodb').MongoClient;
 const mongo_url = "mongodb://localhost:27017/";
@@ -21,7 +22,29 @@ app.use(Session({
     saveUninitialized: true
 }));
 
-MongoClient.connect(mongo_url, function(err, db) {
+
+
+var oauth2Client = new OAuth2("1046715194877-fl8olkt9nhn4u3jvguotvi7a1gfbibil.apps.googleusercontent.com", "wlb8sKTgXaZxehS726LFGODI", "http://localhost:8000/oauthcallback");//paste accordingly
+var scopes =['https://www.googleapis.com/auth/gmail.readonly'];
+
+function getAuthUrl() {
+    var url = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: scopes
+    });
+    return url;
+}
+app.use(express.static('static'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+var url = getAuthUrl();
+
+
+app.get("/url", function(req, res){
+	MongoClient.connect(mongo_url, function(err, db) {
 		  if (err) throw err;
 		  var dbo = db.db("mymails");
 
@@ -39,24 +62,8 @@ MongoClient.connect(mongo_url, function(err, db) {
 		      
 		    }
 		  });
-});
-
-var oauth2Client = new OAuth2("1046715194877-fl8olkt9nhn4u3jvguotvi7a1gfbibil.apps.googleusercontent.com", "wlb8sKTgXaZxehS726LFGODI", "http://localhost:8000/oauthcallback");//paste accordingly
-var scopes =['https://www.googleapis.com/auth/gmail.readonly'];
-
-function getAuthUrl() {
-    var url = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: scopes
-    });
-    return url;
-}
-app.use(express.static('static'));
-
-var url = getAuthUrl();
-
-
-app.get("/url", function(req, res){
+	});
+	threads= [];
 	res.send(url);
 });
 
@@ -75,6 +82,10 @@ app.get("/tokens", function(req, res) {
         res.send('Login failed!!');
       }
     });
+});
+
+app.use("/search", function(req, res) {
+	console.log("Request  "+req.body.keyword);
 });
 
 function listmessage(access_token){
@@ -149,23 +160,25 @@ function getmessage(message,access_token,max_length){
 		}
 
 		console.log(threads.length);
-		console.log(threads);
+		//console.log(threads);
 
 		MongoClient.connect(mongo_url, function(err, db) {
 		  if (err) throw err;
 		  var dbo = db.db("mymails");
-
 		  dbo.collection("mails").insertMany(threads, function(err, res) {
 		    if (err) throw err;
 		    console.log("Number of documents inserted: " + res.insertedCount);
+		    
 		    db.close();
 		  });
 
+		
 		  dbo.collection("mails").find({}).toArray(function(err, result) {
 		    if (err) throw err;
 		    console.log(result);
 		    db.close();
 		  });
+		 
 
 		});
 			

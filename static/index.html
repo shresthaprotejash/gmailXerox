@@ -40,7 +40,10 @@
         console.log(code);
 
         $http.get("tokens?code="+code).then(function(response){
-            console.log(response.data);
+            if(response.data){
+                console.log(response.data);
+                $window.location.href = '/search';
+            }
         })
     }
 
